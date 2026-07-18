@@ -1,0 +1,9 @@
+PORT=5000
+MONGO_URI=mongodb://opensphereAdmin:mkjGpptxPJepWnJ0@ac-a48oyy2-shard-00-00.pr1b9el.mongodb.net:27017,ac-a48oyy2-shard-00-01.pr1b9el.mongodb.net:27017,ac-a48oyy2-shard-00-02.pr1b9el.mongodb.net:27017/opensphere?ssl=true&authSource=admin&retryWrites=true&w=majority
+JWT_SECRET=opensphere_super_secret_jwt_key_2024
+JWT_EXPIRE=7d
+CLOUDINARY_CLOUD_NAME=ddqmqy8ra
+CLOUDINARY_API_KEY=626143953296981
+CLOUDINARY_API_SECRET=blRmT2xRorBF_3n7D_JLnNuiO4g
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3000
