@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* Any element with bg-indigo-600 gets the invert hover automatically */
+  .bg-indigo-600 {
+    @apply border border-indigo-600 transition-all duration-200;
+  }
+  .bg-indigo-600:hover {
+    @apply !bg-white !text-indigo-600;
+  }
+
+  /* Also covers Link components styled as buttons */
+  a.bg-indigo-600:hover {
+    @apply !bg-white !text-indigo-600;
+  }
+}
