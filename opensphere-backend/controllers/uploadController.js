@@ -1,13 +1,17 @@
-const cloudinary = require('cloudinary').v2;
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
-// Use memory storage so we can stream to Cloudinary
+// Use memory storage so we can upload the buffer to S3
 const storage = multer.memoryStorage();
 
 const upload = multer({
@@ -15,7 +19,14 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max
 });
 
-// Upload single file to Cloudinary
+// Generates a unique, safe filename (keeps original extension)
+function generateFileName(originalName) {
+  const ext = path.extname(originalName);
+  const randomStr = crypto.randomBytes(16).toString('hex');
+  return `opensphere/${Date.now()}-${randomStr}${ext}`;
+}
+
+// Upload single file to S3
 exports.uploadFile = [
   upload.single('file'),
   async (req, res) => {
@@ -25,32 +36,26 @@ exports.uploadFile = [
       }
 
       const isImage = req.file.mimetype.startsWith('image/');
+      const key = generateFileName(req.file.originalname);
 
-      // Upload to Cloudinary via stream
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: 'opensphere',
-            resource_type: isImage ? 'image' : 'raw',
-            // For non-images, keep original filename
-            use_filename: true,
-            unique_filename: true,
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        stream.end(req.file.buffer);
+      const command = new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: key,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
       });
+
+      await s3.send(command);
+
+      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
       res.status(200).json({
         success: true,
-        url: result.secure_url,
-        public_id: result.public_id,
-        format: result.format,
-        size: result.bytes,
-        resource_type: result.resource_type,
+        url: fileUrl,
+        public_id: key,
+        format: path.extname(req.file.originalname).replace('.', ''),
+        size: req.file.size,
+        resource_type: isImage ? 'image' : 'raw',
       });
     } catch (error) {
       console.error('Upload error:', error);
