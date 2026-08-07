@@ -12,7 +12,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['SHARED_POST', 'LOGIN_ALERT', 'SYSTEM'],
+    enum: ['SHARED_POST', 'LOGIN_ALERT', 'SYSTEM', 'POST_LIKED', 'NEW_COMMENT'],
     required: true
   },
   message: {

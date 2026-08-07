@@ -38,6 +38,7 @@ app.use('/api/tags', require('./routes/tagRoutes'));
 app.use('/api/posts', require('./routes/postRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
+app.use('/api/posts', require('./routes/engagementRoutes'));
 
 // Error handler (must be last)
 app.use(require('./middleware/error'));

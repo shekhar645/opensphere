@@ -1,6 +1,11 @@
 const Post = require('../models/Post');
 const SharedPermission = require('../models/SharedPermission');
 const ReadingHistory = require('../models/ReadingHistory');
+const Like = require('../models/Like');
+const Comment = require('../models/Comment');
+const Notification = require('../models/Notification');
+const User = require('../models/User');
+const sendEmail = require('../utils/sendEmail');
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 
@@ -438,6 +443,175 @@ exports.downloadAttachment = async (req, res) => {
     response.data.pipe(res);
   } catch (error) {
     console.error('DOWNLOAD ERROR:', error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+// @desc    Get like status + count for a post
+// @route   GET /api/posts/:id/like
+// @desc    Get like status + count for a post
+// @route   GET /api/posts/:id/like
+exports.getLikeStatus = async (req, res) => {
+  try {
+    const count = await Like.countDocuments({ post: req.params.id });
+    let liked = false;
+
+    if (req.user) {
+      const existing = await Like.findOne({ post: req.params.id, user: req.user._id });
+      liked = !!existing;
+    } else if (req.query.guestId) {
+      const existing = await Like.findOne({ post: req.params.id, guestId: req.query.guestId });
+      liked = !!existing;
+    }
+
+    res.status(200).json({ success: true, liked, count });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Toggle like on a post
+// @route   POST /api/posts/:id/like
+// @desc    Toggle like on a post
+// @route   POST /api/posts/:id/like
+exports.toggleLike = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+    const { guestId, guestName } = req.body;
+    if (!req.user && !guestId) {
+      return res.status(400).json({ success: false, message: 'Name is required' });
+    }
+
+    const filter = req.user
+      ? { post: post._id, user: req.user._id }
+      : { post: post._id, guestId };
+
+    const existing = await Like.findOne(filter);
+    let liked;
+    let likerName = req.user ? req.user.fullName : guestName;
+
+    if (existing) {
+      await Like.deleteOne({ _id: existing._id });
+      liked = false;
+    } else {
+      await Like.create(
+        req.user
+          ? { post: post._id, user: req.user._id }
+          : { post: post._id, guestId, guestName: guestName?.trim() || 'Guest' }
+      );
+      liked = true;
+
+      const isOwnPost = req.user && post.author.toString() === req.user._id.toString();
+      if (!isOwnPost) {
+        await Notification.create({
+          recipient: post.author,
+          sender: req.user ? req.user._id : undefined,
+          type: 'POST_LIKED',
+          message: `${likerName} liked your post "${post.title}"`,
+          post: post._id
+        });
+
+        const author = await User.findById(post.author);
+        if (author?.email) {
+          sendEmail({
+            to: author.email,
+            subject: 'New like on your post',
+            html: `<p><strong>${likerName}</strong> liked your post "<strong>${post.title}</strong>".</p>`
+          }).catch(err => console.error('Email send failed:', err.message));
+        }
+      }
+    }
+
+    const count = await Like.countDocuments({ post: post._id });
+    res.status(200).json({ success: true, liked, count });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get comments for a post
+// @route   GET /api/posts/:id/comments
+exports.getComments = async (req, res) => {
+  try {
+    const comments = await Comment.find({ post: req.params.id })
+      .populate('author', 'fullName username profilePicture')
+      .sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: comments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Add a comment to a post
+// @route   POST /api/posts/:id/comments
+
+// @desc    Add a comment to a post
+// @route   POST /api/posts/:id/comments
+exports.addComment = async (req, res) => {
+  try {
+    const { text, guestName } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ success: false, message: 'Comment text is required' });
+    }
+    if (!req.user && (!guestName || !guestName.trim())) {
+      return res.status(400).json({ success: false, message: 'Name is required' });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+
+    const comment = await Comment.create({
+      post: post._id,
+      author: req.user ? req.user._id : undefined,
+      guestName: req.user ? undefined : guestName.trim(),
+      text: text.trim()
+    });
+
+    if (req.user) await comment.populate('author', 'fullName username profilePicture');
+
+    const commenterName = req.user ? req.user.fullName : guestName.trim();
+    const isOwnPost = req.user && post.author.toString() === req.user._id.toString();
+
+    if (!isOwnPost) {
+      await Notification.create({
+        recipient: post.author,
+        sender: req.user ? req.user._id : undefined,
+        type: 'NEW_COMMENT',
+        message: `${commenterName} commented on your post "${post.title}"`,
+        post: post._id
+      });
+
+      const author = await User.findById(post.author);
+      if (author?.email) {
+        sendEmail({
+          to: author.email,
+          subject: 'New comment on your post',
+          html: `<p><strong>${commenterName}</strong> commented on your post "<strong>${post.title}</strong>":</p><p>${text.trim()}</p>`
+        }).catch(err => console.error('Email send failed:', err.message));
+      }
+    }
+
+    res.status(201).json({ success: true, data: comment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete a comment
+// @route   DELETE /api/posts/:id/comments/:commentId
+exports.deleteComment = async (req, res) => {
+  try {
+    const comment = await Comment.findById(req.params.commentId);
+    if (!comment) return res.status(404).json({ success: false, message: 'Comment not found' });
+
+    if (comment.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized to delete this comment' });
+    }
+
+    await Comment.deleteOne({ _id: comment._id });
+    res.status(200).json({ success: true, message: 'Comment deleted' });
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };

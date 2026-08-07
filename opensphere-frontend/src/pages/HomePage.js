@@ -50,7 +50,7 @@ const AdminHero = () => (
         my space
       </motion.div>
 
-      {/* Socrates Quote */}
+      {/* Space Quote */}
       <motion.div
         className="mb-8"
         initial={{ opacity: 0, x: -10 }}
@@ -60,13 +60,15 @@ const AdminHero = () => (
         <div className="flex items-start gap-3">
           <span className="text-5xl text-indigo-200 font-serif leading-none mt-1 select-none">"</span>
           <div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug">
-              The unexamined life is<br />
-              not worth <span className="text-indigo-600">living.</span>
+            <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight">
+              Love <span className="text-indigo-600">For</span> Wisdom
             </p>
-            <p className="text-sm text-gray-400 mt-3 tracking-widest uppercase font-medium">
-              — Socrates
-            </p>
+            <div className="flex items-center gap-2 mt-3">
+              <span className="w-6 h-px bg-gray-300" />
+              <p className="text-xs text-gray-400 tracking-widest uppercase font-semibold">
+                Believe Yourself
+              </p>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -77,7 +79,7 @@ const AdminHero = () => (
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35 }}
       >
-        A quiet place where I write, share files, and put things I don't want to forget.
+          My personal space to write, reflect, and hold onto what matters.
       </motion.p>
 
       <motion.div

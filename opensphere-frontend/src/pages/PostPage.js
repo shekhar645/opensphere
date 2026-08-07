@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import API from '../api/axios';
 import { getFileIcon, formatFileSize } from '../utils/cloudinary';
+import PostEngagement from '../components/PostEngagement';
 import toast from 'react-hot-toast';
 
 const PostSkeleton = () => (
@@ -257,7 +258,7 @@ export default function PostPage() {
             ))}
           </div>
         )}
-
+       <PostEngagement postId={post._id} />
         {post.attachments?.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
