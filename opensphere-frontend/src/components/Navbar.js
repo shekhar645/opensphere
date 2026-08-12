@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
+import logo from '../assets/logo.png';
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
@@ -102,8 +103,8 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
 
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold text-indigo-600 shrink-0 tracking-tight">
-          OpenSphere
+        <Link to="/" className="shrink-0">
+          <img src={logo} alt="OpenSphere" className="h-8 w-auto" />
         </Link>
 
         {/* Desktop nav */}
