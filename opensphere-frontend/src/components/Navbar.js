@@ -99,12 +99,12 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
+    <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 h-16 overflow-visible">
+      <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
 
         {/* Logo */}
         <Link to="/" className="shrink-0">
-          <img src={logo} alt="OpenSphere" className="h-8 w-auto" />
+          <img src={logo} alt="OpenSphere" className="h-[270px] w-auto" />
         </Link>
 
         {/* Desktop nav */}
