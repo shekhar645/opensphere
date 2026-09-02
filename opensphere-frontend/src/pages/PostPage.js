@@ -57,7 +57,9 @@ export default function PostPage() {
   }, []);
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
+    const apiBase = process.env.REACT_APP_API_URL || 'https://api.opensphere.sbs/api';
+    const previewUrl = `${apiBase.replace(/\/api$/, '')}/api/posts/${slug}/preview`;
+    navigator.clipboard.writeText(previewUrl);
     setCopied(true);
     toast.success('Link copied!');
     setTimeout(() => setCopied(false), 2000);
