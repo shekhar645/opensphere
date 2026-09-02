@@ -36,6 +36,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
 app.use('/api/tags', require('./routes/tagRoutes'));
 app.use('/api/posts', require('./routes/postRoutes'));
+app.use('/api/updates', require('./routes/updateRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/posts', require('./routes/engagementRoutes'));

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 import logo from '../assets/logo.png';
+import UpdatesButton from './UpdatesButton';
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
@@ -103,12 +104,12 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 h-full flex items-center justify-between">
 
         {/* Logo */}
-        <Link to="/" className="shrink-0">
-          <img src={logo} alt="OpenSphere" className="h-[270px] w-auto" />
+        <Link to="/" className="shrink-0 flex items-center">
+          <img src={logo} alt="OpenSphere" className="h-8 sm:h-9 w-auto object-contain" />
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-5">
+        <div className="hidden md:flex items-center gap-4">
 
           {/* Search */}
           <div className="relative" ref={dropdownRef}>
@@ -221,6 +222,8 @@ export default function Navbar() {
 
           <Link to="/" className={navLinkClass('/')}>Home</Link>
 
+          <UpdatesButton />
+
           {user && (
             <>
               {isAdmin && (
@@ -280,7 +283,7 @@ export default function Navbar() {
             transition={{ duration: 0.2, ease: 'easeInOut' }}
             className="md:hidden border-t border-gray-50 bg-white overflow-hidden"
           >
-            <div className="px-4 py-4 space-y-1">
+            <div className="px-4 py-4 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
 
               {/* Mobile search */}
               <form onSubmit={handleSubmit} className="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2.5 mb-3">
@@ -333,6 +336,11 @@ export default function Navbar() {
                 </svg>
                 Home
               </Link>
+
+              {/* Mobile updates entry */}
+              <div className="px-3 py-1">
+                <UpdatesButton />
+              </div>
 
               {user && (
                 <>

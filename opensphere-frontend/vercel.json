@@ -1,5 +1,15 @@
 {
   "rewrites": [
-    { "source": "/post/:slug", "destination": "/api/prerender?slug=:slug" }
+    {
+      "source": "/post/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "User-Agent",
+          "value": ".*(facebookexternalhit|LinkedInBot|Twitterbot|WhatsApp|Slackbot|TelegramBot|Discordbot).*"
+        }
+      ],
+      "destination": "/api/prerender?slug=:slug"
+    }
   ]
 }
