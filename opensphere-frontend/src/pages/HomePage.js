@@ -5,6 +5,25 @@ import API from '../api/axios';
 import PostCard from '../components/PostCard';
 import { useAuth } from '../context/AuthContext';
 
+// Dynamic quotes shown on the admin hero — one new quote per visit/login
+const ADMIN_QUOTES = [
+  "Write it down before the thought disappears.",
+  "Small entries, built over time, become a mind.",
+  "Not every thought needs an audience — some just need a page.",
+  "Clarity is a habit, not a talent.",
+  "The blank page is patient. Fill it anyway.",
+  "Ideas compound the same way habits do.",
+  "You don't find your voice — you write your way into it.",
+  "Today's draft is tomorrow's reference.",
+  "Discipline looks like showing up on the boring days too.",
+  "A post a day keeps the doubt away.",
+  "Build in public, think in private, publish when ready.",
+  "Consistency beats intensity, always.",
+];
+
+const getRandomQuote = () =>
+  ADMIN_QUOTES[Math.floor(Math.random() * ADMIN_QUOTES.length)];
+
 const SkeletonCard = () => (
   <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse shadow-sm">
     <div className="w-full h-52 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100" />
@@ -27,86 +46,86 @@ const SkeletonCard = () => (
   </div>
 );
 
-const AdminHero = () => (
-  <div className="relative bg-white border-b border-gray-100 overflow-hidden">
-    <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-50 rounded-full opacity-60 blur-3xl" />
-      <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-purple-50 rounded-full opacity-40 blur-3xl" />
-    </div>
+const AdminHero = () => {
+  // Pick a new quote once per mount (i.e. once per login/visit to home)
+  const [quote] = useState(getRandomQuote);
 
-    <motion.div
-      className="relative max-w-2xl mx-auto px-4 py-16 sm:py-24"
-      initial={{ opacity: 0, y: -16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-    >
-      <motion.div
-        className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-500 text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full mb-8"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.15 }}
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
-        my space
-      </motion.div>
-
-      {/* Space Quote */}
-      <motion.div
-        className="mb-8"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.25, duration: 0.5 }}
-      >
-        <div className="flex items-start gap-3">
-          <span className="text-5xl text-indigo-200 font-serif leading-none mt-1 select-none">"</span>
-          <div>
-            <p className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight">
-              Love <span className="text-indigo-600">For</span> Wisdom
-            </p>
-            <div className="flex items-center gap-2 mt-3">
-              <span className="w-6 h-px bg-gray-300" />
-              <p className="text-xs text-gray-400 tracking-widest uppercase font-semibold">
-                Believe Yourself
-              </p>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <motion.p
-        className="text-sm text-gray-400 max-w-sm leading-relaxed mb-8"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.35 }}
-      >
-          My personal space to write, reflect, and hold onto what matters.
-      </motion.p>
+  return (
+    <div className="relative bg-white border-b border-gray-100 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-50 rounded-full opacity-60 blur-3xl" />
+        <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-purple-50 rounded-full opacity-40 blur-3xl" />
+      </div>
 
       <motion.div
-        className="flex items-center gap-3 flex-wrap"
-        initial={{ opacity: 0, y: 8 }}
+        className="relative max-w-2xl mx-auto px-4 py-16 sm:py-24"
+        initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        <Link
-          to="/create"
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-200 hover:shadow-indigo-300 hover:shadow-lg"
+        <motion.div
+          className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-500 text-xs font-semibold tracking-widest uppercase px-3 py-1.5 rounded-full mb-8"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.15 }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New post
-        </Link>
-        <Link
-          to="/admin"
-          className="text-sm font-medium text-gray-500 hover:text-indigo-600 border border-gray-200 hover:border-indigo-300 bg-white px-5 py-2.5 rounded-xl transition-all hover:shadow-sm"
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse inline-block" />
+          my space
+        </motion.div>
+
+        {/* Dynamic one-line quote — new one each visit */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
         >
-          Dashboard →
-        </Link>
+          <div className="flex items-start gap-3">
+            <span className="text-5xl text-indigo-200 font-serif leading-none mt-1 select-none">"</span>
+            <p
+              className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug tracking-tight truncate max-w-full"
+              title={quote}
+            >
+              {quote}
+            </p>
+          </div>
+        </motion.div>
+
+        <motion.p
+          className="text-sm text-gray-400 max-w-sm leading-relaxed mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+        >
+            My personal space to write, reflect, and hold onto what matters.
+        </motion.p>
+
+        <motion.div
+          className="flex items-center gap-3 flex-wrap"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+        >
+          <Link
+            to="/create"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-200 hover:shadow-indigo-300 hover:shadow-lg"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New post
+          </Link>
+          <Link
+            to="/admin"
+            className="text-sm font-medium text-gray-500 hover:text-indigo-600 border border-gray-200 hover:border-indigo-300 bg-white px-5 py-2.5 rounded-xl transition-all hover:shadow-sm"
+          >
+            Dashboard →
+          </Link>
+        </motion.div>
       </motion.div>
-    </motion.div>
-  </div>
-);
+    </div>
+  );
+};
 
 export default function HomePage() {
   const { isAdmin } = useAuth();

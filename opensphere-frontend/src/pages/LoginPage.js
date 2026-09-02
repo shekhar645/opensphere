@@ -50,8 +50,13 @@ export default function LoginPage() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
+              className="flex flex-col items-center"
             >
-              <span className="text-3xl font-bold text-indigo-600">OpenSphere</span>
+              <img
+                src="/logo192.png"
+                alt="OpenSphere"
+                className="h-14 w-14 object-contain mb-2"
+              />
               <p className="text-sm text-gray-400 mt-1">Welcome back</p>
             </motion.div>
           </div>
