@@ -17,6 +17,8 @@ import AdminTags from './pages/admin/AdminTags';
 import SearchPage from './pages/SearchPage';
 import ProfilePage from './pages/ProfilePage';
 import CreatePost from './pages/admin/CreatePost';
+import UpdatesPage from './pages/UpdatesPage';
+
 
 // Page wrapper — every page fades + slides up on enter, fades out on exit
 const PageTransition = ({ children }) => (
@@ -57,6 +59,7 @@ function AnimatedRoutes() {
         <Route path="/post/:slug" element={<PageTransition><PostPage /></PageTransition>} />
         <Route path="/search" element={<PageTransition><SearchPage /></PageTransition>} />
         <Route path="/create" element={<ProtectedRoute adminOnly><CreatePost /></ProtectedRoute>} />
+        <Route path="/updates" element={<UpdatesPage user={user} />} />
         <Route path="/profile" element={
           <ProtectedRoute>
             <PageTransition><ProfilePage /></PageTransition>

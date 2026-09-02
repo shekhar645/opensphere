@@ -53,7 +53,7 @@ export default function LoginPage() {
               className="flex flex-col items-center"
             >
               <img
-                src="/logo192.png"
+                src="/logo.png"
                 alt="OpenSphere"
                 className="h-14 w-14 object-contain mb-2"
               />
