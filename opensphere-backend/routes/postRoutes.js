@@ -5,7 +5,7 @@ const {
   deletePost, searchPosts, getAdminPosts, sharePost,
   getDashboardStats, getPortfolioPosts, downloadAttachment,
   downloadPostAsPdf, getLikeStatus, toggleLike,
-  getComments, addComment, deleteComment
+  getComments, addComment, deleteComment, getSocialPreview
 } = require('../controllers/postController');
 const { protect, adminOnly, optionalAuth } = require('../middleware/auth');
 
@@ -13,6 +13,7 @@ router.get('/search', optionalAuth, searchPosts);
 router.get('/admin/all', protect, adminOnly, getAdminPosts);
 router.get('/admin/stats', protect, adminOnly, getDashboardStats);
 router.get('/portfolio', getPortfolioPosts);
+router.get('/:slug/preview', getSocialPreview);
 router.get('/', optionalAuth, getPosts);
 router.get('/:slug', optionalAuth, getPostBySlug);
 router.post('/', protect, adminOnly, createPost);

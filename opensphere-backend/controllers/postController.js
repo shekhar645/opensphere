@@ -448,8 +448,6 @@ exports.downloadAttachment = async (req, res) => {
 };
 // @desc    Get like status + count for a post
 // @route   GET /api/posts/:id/like
-// @desc    Get like status + count for a post
-// @route   GET /api/posts/:id/like
 exports.getLikeStatus = async (req, res) => {
   try {
     const count = await Like.countDocuments({ post: req.params.id });
@@ -469,8 +467,6 @@ exports.getLikeStatus = async (req, res) => {
   }
 };
 
-// @desc    Toggle like on a post
-// @route   POST /api/posts/:id/like
 // @desc    Toggle like on a post
 // @route   POST /api/posts/:id/like
 exports.toggleLike = async (req, res) => {
@@ -545,9 +541,6 @@ exports.getComments = async (req, res) => {
 
 // @desc    Add a comment to a post
 // @route   POST /api/posts/:id/comments
-
-// @desc    Add a comment to a post
-// @route   POST /api/posts/:id/comments
 exports.addComment = async (req, res) => {
   try {
     const { text, guestName } = req.body;
@@ -613,5 +606,65 @@ exports.deleteComment = async (req, res) => {
     res.status(200).json({ success: true, message: 'Comment deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Social preview page for a post (LinkedIn/Facebook/Twitter crawlers)
+// @route   GET /api/posts/:slug/preview
+exports.getSocialPreview = async (req, res) => {
+  try {
+    const post = await Post.findOne({ slug: req.params.slug, isPublished: true })
+      .populate('category', 'name');
+
+    if (!post) return res.status(404).send('Post not found');
+
+    const frontendUrl = process.env.FRONTEND_URL || 'https://opensphere.sbs';
+    const realUrl = `${frontendUrl}/post/${post.slug}`;
+
+    const userAgent = req.headers['user-agent'] || '';
+    const isBot = /facebookexternalhit|LinkedInBot|Twitterbot|WhatsApp|Slackbot|TelegramBot|Discordbot/i.test(userAgent);
+
+    if (!isBot) {
+      // Real human — send them straight to the real post page
+      return res.redirect(302, realUrl);
+    }
+
+    const escapeHtml = (str) =>
+      String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+
+    const title = escapeHtml(post.title);
+    const description = escapeHtml(post.subtitle || post.shortDescription || 'Read this post on OpenSphere.');
+    const image = post.coverImage || `${frontendUrl}/og-image.png`;
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>${title}</title>
+  <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="${description}" />
+  <meta property="og:image" content="${image}" />
+  <meta property="og:url" content="${realUrl}" />
+  <meta property="og:type" content="article" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="${description}" />
+  <meta name="twitter:image" content="${image}" />
+</head>
+<body>
+  <p>View this post at <a href="${realUrl}">${realUrl}</a></p>
+</body>
+</html>
+    `.trim();
+
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(html);
+  } catch (error) {
+    res.status(500).send('Something went wrong');
   }
 };
